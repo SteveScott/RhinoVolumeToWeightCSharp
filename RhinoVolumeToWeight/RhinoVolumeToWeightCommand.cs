@@ -1,10 +1,12 @@
 ﻿using Rhino;
 using Rhino.Commands;
+using Rhino.DocObjects;
 using Rhino.Geometry;
 using Rhino.Input;
 using Rhino.Input.Custom;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace RhinoVolumeToWeight
 {
@@ -27,8 +29,60 @@ namespace RhinoVolumeToWeight
         {
             // TODO: start here modifying the behaviour of your command.
             // ---
-            RhinoApp.WriteLine("The {0} command will add a line right now.", EnglishName);
+            RhinoApp.WriteLine("Select a volume");
+            Rhino.Geometry.Mesh thisMesh;
+            Rhino.Geometry.Brep thisBrep;
+  
+            double thisVolume;
+            using (GetObject getObject = new GetObject())
+            {
 
+                getObject.SetCommandPrompt("Please select a volume.");
+                var result = getObject.Get();
+                ObjRef objref = getObject.Object(0);
+                thisBrep = objref.Brep();
+                thisMesh = objref.Mesh();
+                if (thisBrep == null && thisMesh == null)
+                {
+                    RhinoApp.WriteLine("Not an Object. It is a {0}", result);
+                    return Result.Failure;
+                }
+
+                else 
+                {
+                    if (thisMesh != null)
+                        {
+                        if (thisMesh.IsSolid) {
+                            var massProperties = VolumeMassProperties.Compute(thisMesh);
+                            RhinoApp.WriteLine("the volume of the MESH is {0}", massProperties.Volume);
+                        }
+                        else
+                        {
+                            RhinoApp.WriteLine("this mesh is not solid.");
+                            return Result.Failure;
+                        }
+
+
+                    }
+                    else
+                    {
+                        if (thisBrep.IsSolid){
+                            var massProperties = VolumeMassProperties.Compute(thisBrep);
+                            RhinoApp.WriteLine("The volume of this BREP is {0}", massProperties.Volume);
+                        }
+                        else
+                        {
+                            RhinoApp.WriteLine("this mesh is not solid");
+                            return Result.Failure;
+                        }
+                    }
+                    return Result.Success;
+
+                }    
+                
+            }
+            
+            /*
             Point3d pt0;
             using (GetPoint getPointAction = new GetPoint())
             {
@@ -59,9 +113,9 @@ namespace RhinoVolumeToWeight
             doc.Objects.AddLine(pt0, pt1);
             doc.Views.Redraw();
             RhinoApp.WriteLine("The {0} command added one line to the document.", EnglishName);
-
+            */
             // ---
-            return Result.Success;
+
         }
     }
 }
