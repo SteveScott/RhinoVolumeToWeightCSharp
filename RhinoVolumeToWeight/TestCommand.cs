@@ -36,24 +36,56 @@ namespace RhinoVolumeToWeight
             GetObject getObject = new GetObject();
             getObject.SetCommandPrompt("Select an object.");
             var result = getObject.Get();
-            Rhino.Input.Custom.OptionInteger optInteger = new Rhino.Input.Custom.OptionInteger(1, -1, 100);
-            //selects an object
-                
-            //get an integer
-            GetInteger getInteger = new GetInteger();
-            getInteger.SetCommandPrompt("Please select an integer.");
-            result = getInteger.Get();
-            Rhino.RhinoApp.WriteLine(" Integer = {0}", optInteger.CurrentValue);
-            //always prints "Integer = 1"
 
-            //get an option
-            GetOption getOption = new GetOption();
-            string[] listValues = new string[] { "Sterling Silver", "Brass", "Bronze", "14K Gold", "18K Gold", "24K Gold", "Platinum", "Paladium" };
-            int listIndex = 0;
-            getOption.AddOptionList("Material", listValues, listIndex);
+            //get an integer
+            Rhino.Input.Custom.OptionInteger optInteger = new Rhino.Input.Custom.OptionInteger(1, -1, 100);
+            GetOption getIntOption = new GetOption();
+            getIntOption.AddOptionInteger("optionInteger", ref optInteger);
+            getIntOption.SetCommandPrompt("Please select an integer.");
+            result = getIntOption.Get();
+            Rhino.RhinoApp.WriteLine(" Integer = {0}", optInteger.CurrentValue);
+
+            //get a material
+            const string materialKey = "Material";
+            string[] materialList = new string[] { "SterlingSilver", "Brass", "Bronze", "Gold_14K", "Gold_18K", "Gold_24K", "Platinum", "Paladium" };
+            var materialIndex = Settings.GetInteger(materialKey, 0);
+            var getOption = new GetOption();
             getOption.SetCommandPrompt("select option");
-            getOption.Get();
-            Rhino.RhinoApp.WriteLine("material selected is {0}", listValues[getOption.OptionIndex()]);
+            while (true)
+            {
+                getOption.ClearCommandOptions();
+                var materialOption = getOption.AddOptionList(materialKey, materialList, materialIndex);
+                var res = getOption.Get();
+                if (res == GetResult.Option)
+                {
+                    Rhino.RhinoApp.WriteLine("result was an option. Continuing.");
+                    var option = getOption.Option();
+                    if (option.Index == materialOption)
+                    {
+                        materialIndex = option.CurrentListOptionIndex;
+                    }
+                    continue;
+                }
+                else if (res == GetResult.Nothing)
+                {
+                    Rhino.RhinoApp.WriteLine("result was nothing.");
+                    break;
+                }
+                else if (res == GetResult.Cancel)
+                {
+                    Rhino.RhinoApp.WriteLine("result was cancel");
+                    return Result.Cancel;
+                }
+                else
+                {
+                    Rhino.RhinoApp.Write("the result fell through and was a {0}.", res);
+                    return Result.Cancel;
+                }
+
+            }
+            //this code is unreachable.
+            Settings.SetInteger(materialKey, materialIndex);
+            Rhino.RhinoApp.WriteLine("material selected is {0}", materialList[materialIndex]);
             //always says invalid selection for any number or string. Does not display options.
             //Throws an exception when I hit escape.
             return Result.Success;

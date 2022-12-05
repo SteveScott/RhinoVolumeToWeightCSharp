@@ -42,8 +42,8 @@ namespace RhinoVolumeToWeight
                 getObject.EnablePressEnterWhenDonePrompt(true);
                 int opList = getObject.AddOptionList("List", listValues, listIndex);
                 getObject.SetCommandPrompt("Please select a material.");
-                Rhino.Input.Custom.OptionInteger optMaterial = new Rhino.Input.Custom.OptionInteger(1, -1, 100);
-                getObject.AddOptionInteger("Material Integer", ref optMaterial);
+                Rhino.Input.Custom.OptionInteger optInteger = new Rhino.Input.Custom.OptionInteger(1, -1, 100);
+                getObject.AddOptionInteger("Material Integer", ref optInteger);
                 var result = getObject.Get();
                 ObjRef objref = getObject.Object(0);
                 thisBrep = objref.Brep();
@@ -87,7 +87,7 @@ namespace RhinoVolumeToWeight
 
                 }
 
-                Rhino.RhinoApp.WriteLine(" Integer = {0}", listValues[optMaterial.CurrentValue]);
+                Rhino.RhinoApp.WriteLine(" Integer = {0}", listValues[optInteger.CurrentValue]);
                 double density = 10.4;
                 double mass = density * thisVolume;
                 RhinoApp.WriteLine("The weight is {0} {1} of {2}.", mass, "grams", "Sterling Silver");
