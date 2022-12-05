@@ -36,8 +36,14 @@ namespace RhinoVolumeToWeight
             double thisVolume;
             using (GetObject getObject = new GetObject())
             {
-
-                getObject.SetCommandPrompt("Please select a volume.");
+                string[] listValues = new string[] { "Sterling Silver", "Brass", "Bronze", "14K Gold", "18K Gold", "24K Gold", "Platinum", "Paladium" };
+                int listIndex = 0;
+                getObject.SetCommandPrompt("Select an object.");
+                getObject.EnablePressEnterWhenDonePrompt(true);
+                int opList = getObject.AddOptionList("List", listValues, listIndex);
+                getObject.SetCommandPrompt("Please select a material.");
+                Rhino.Input.Custom.OptionInteger optMaterial = new Rhino.Input.Custom.OptionInteger(1, -1, 100);
+                getObject.AddOptionInteger("Material Integer", ref optMaterial);
                 var result = getObject.Get();
                 ObjRef objref = getObject.Object(0);
                 thisBrep = objref.Brep();
@@ -48,27 +54,28 @@ namespace RhinoVolumeToWeight
                     return Result.Failure;
                 }
 
-                else 
+                else
                 {
                     if (thisMesh != null)
-                        {
+                    {
                         if (thisMesh.IsSolid) {
                             var massProperties = VolumeMassProperties.Compute(thisMesh);
-                            RhinoApp.WriteLine("the volume of the MESH is {0}", massProperties.Volume);
+                            thisVolume = massProperties.Volume / 1000.0;
+                            RhinoApp.WriteLine("the volume of the MESH is {0} cm^3", thisVolume);
                         }
                         else
                         {
                             RhinoApp.WriteLine("this mesh is not solid.");
                             return Result.Failure;
                         }
-
-
                     }
                     else
                     {
-                        if (thisBrep.IsSolid){
+                        if (thisBrep.IsSolid) {
                             var massProperties = VolumeMassProperties.Compute(thisBrep);
-                            RhinoApp.WriteLine("The volume of this BREP is {0}", massProperties.Volume);
+                            thisVolume = massProperties.Volume / 1000.0;
+                            RhinoApp.WriteLine("The volume of this BREP is {0} cm^3", thisVolume);
+                            
                         }
                         else
                         {
@@ -76,10 +83,15 @@ namespace RhinoVolumeToWeight
                             return Result.Failure;
                         }
                     }
-                    return Result.Success;
 
-                }    
-                
+
+                }
+
+                Rhino.RhinoApp.WriteLine(" Integer = {0}", listValues[optMaterial.CurrentValue]);
+                double density = 10.4;
+                double mass = density * thisVolume;
+                RhinoApp.WriteLine("The weight is {0} {1} of {2}.", mass, "grams", "Sterling Silver");
+                return Result.Success;
             }
             
             /*
