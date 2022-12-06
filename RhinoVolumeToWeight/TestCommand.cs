@@ -38,23 +38,38 @@ namespace RhinoVolumeToWeight
             var result = getObject.Get();
 
             //get an integer
-            Rhino.Input.Custom.OptionInteger optInteger = new Rhino.Input.Custom.OptionInteger(1, -1, 100);
+            //the default option integer is always 0 because we are not storing it with Settings.SetInteger. The range of possible integers is -1 to 100.
+            Rhino.Input.Custom.OptionInteger optInteger = new Rhino.Input.Custom.OptionInteger(0, -1, 100);
             GetOption getIntOption = new GetOption();
+            //add OptionInteger to the GetOption class instance. 
             getIntOption.AddOptionInteger("optionInteger", ref optInteger);
             getIntOption.SetCommandPrompt("Please select an integer.");
+            //Get awaits user input.
             result = getIntOption.Get();
             Rhino.RhinoApp.WriteLine(" Integer = {0}", optInteger.CurrentValue);
 
-            //get a material
-            const string materialKey = "Material";
-            string[] materialList = new string[] { "SterlingSilver", "Brass", "Bronze", "Gold_14K", "Gold_18K", "Gold_24K", "Platinum", "Paladium" };
-            var materialIndex = Settings.GetInteger(materialKey, 0);
+            //get an option
+            const string optionsKey = "Options";
+            //No whitespace in options. 
+            string[] optionsList = new string[] { "foo", "bar", "baz" };
+            //setting is long-term storage. It persists even between sessions. Zero is the default
+            var optionIndex = Settings.GetInteger(optionsKey, 0);
             var getOption = new GetOption();
-            getOption.SetCommandPrompt("select option");
+            //there is a loop below. To exit the loop in needs the user to hit the spacebar when all options are complete. 
+            // AcceptNothing allows a Reult.Nothing to be passed when you hit spacebard, which we set as a break in the loop. Otherewise it will send a Result.Cancel, which returns.
+            // Hitting Escape also results in Resutl.Cancel.
+            getOption.AcceptNothing(true);
+            getOption.SetCommandPrompt("select option.");
+            //After getting the option, it will display the option agian getOption.Get() until you hit escape (cancel) or spacebar (nothing) to break the loop.
             while (true)
             {
-                getOption.ClearCommandOptions();
-                var materialOption = getOption.AddOptionList(materialKey, materialList, materialIndex);
+                //clear out existing options. Don't think we need it.
+                //getOption.ClearCommandOptions();
+
+                //add the option list to the GetOption object.
+                // Rhino will automatically assign letters.For example[foo, bar, baz] will underline f, b, a.
+                var materialOption = getOption.AddOptionList(optionsKey, optionsList, optionIndex);
+                //Accept user input. It will display all the options from materialList. 
                 var res = getOption.Get();
                 if (res == GetResult.Option)
                 {
@@ -62,19 +77,19 @@ namespace RhinoVolumeToWeight
                     var option = getOption.Option();
                     if (option.Index == materialOption)
                     {
-                        materialIndex = option.CurrentListOptionIndex;
+                        optionIndex = option.CurrentListOptionIndex;
                     }
-                    continue;
+                    continue; //after selecting an option from the optionList, returns to the prompt from getOption.Get() and asks if you want to set the option again.
                 }
                 else if (res == GetResult.Nothing)
                 {
-                    Rhino.RhinoApp.WriteLine("result was nothing.");
+                    Rhino.RhinoApp.WriteLine("result was nothing. We break the infinite loop and continue to the final section.");
                     break;
                 }
                 else if (res == GetResult.Cancel)
                 {
                     Rhino.RhinoApp.WriteLine("result was cancel");
-                    return Result.Cancel;
+                    return Result.Cancel; //end command prematurely by returning a Cancel result.
                 }
                 else
                 {
@@ -83,11 +98,9 @@ namespace RhinoVolumeToWeight
                 }
 
             }
-            //this code is unreachable.
-            Settings.SetInteger(materialKey, materialIndex);
-            Rhino.RhinoApp.WriteLine("material selected is {0}", materialList[materialIndex]);
-            //always says invalid selection for any number or string. Does not display options.
-            //Throws an exception when I hit escape.
+            //settings is long-term storage. Pushing the selected materialIndex to Settings for storage.
+            Settings.SetInteger(optionsKey, optionIndex);
+            Rhino.RhinoApp.WriteLine("option selected is {0}", optionsList[optionIndex]);
             return Result.Success;
             
 
