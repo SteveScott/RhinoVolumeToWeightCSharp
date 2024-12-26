@@ -23,7 +23,7 @@ namespace RhinoVolumeToWeight
         public static RhinoVolumeToWeightCommand Instance { get; private set; }
 
         ///<returns>The command name as it appears on the Rhino command line.</returns>
-        public override string EnglishName => "RhinoVolumeToWeightCommand";
+        public override string EnglishName => "MetalWeight";
 
         protected override Result RunCommand(RhinoDoc doc, RunMode mode)
         {
