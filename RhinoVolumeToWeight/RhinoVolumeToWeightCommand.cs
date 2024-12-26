@@ -83,25 +83,21 @@ namespace RhinoVolumeToWeight
                             return Result.Failure;
                         }
                     }
-
-
                 }
              
-
-                //Rhino.Input.Custom.OptionInteger optInteger = new Rhino.Input.Custom.OptionInteger(3, 0, Densities.metals.Length);
                 var go = new GetOption();
-                int listIndex = 2;
-
-                int opList = go.AddOptionList("Metals", Densities.metals, listIndex);
+                int metalIndex = 2;
+                int opList = go.AddOptionList("Metals", Densities.metals, metalIndex);
+                go.AcceptNothing(true);
                 go.SetCommandPrompt("Please select a material.");
                 GetResult res = go.Get();
-                if (res != GetResult.Option)
-                {
-                    RhinoApp.WriteLine("invalid input. please select a material");
-                    return Result.Failure;
+
+                if (res == GetResult.Option)
+                { 
+                    var option = go.Option();
+                    metalIndex = go.Option().CurrentListOptionIndex;
                 }
-                var option = go.Option();
-                int metalIndex = option.CurrentListOptionIndex;
+
                 //caluclate density
                 Rhino.RhinoApp.WriteLine(" selection = {0}", Densities.metals[metalIndex]);
                 double density = Densities.metalDensitites[Densities.metals[metalIndex]];
