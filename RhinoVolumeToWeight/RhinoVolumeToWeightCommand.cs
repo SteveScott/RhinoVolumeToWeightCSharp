@@ -38,7 +38,7 @@ namespace RhinoVolumeToWeight
             {
                 //select an object
 
-                int listIndex = 0;
+
                 getObject.SetCommandPrompt("Select an object.");
                 getObject.EnablePressEnterWhenDonePrompt(true);
 
@@ -86,10 +86,12 @@ namespace RhinoVolumeToWeight
 
 
                 }
+             
 
-                Rhino.Input.Custom.OptionInteger optInteger = new Rhino.Input.Custom.OptionInteger(3, 0, Densities.metals.Length);
+                //Rhino.Input.Custom.OptionInteger optInteger = new Rhino.Input.Custom.OptionInteger(3, 0, Densities.metals.Length);
                 var go = new GetOption();
-                //int optInteger2 = go.AddOptionInteger("MetalOption", ref optInteger);
+                int listIndex = 2;
+
                 int opList = go.AddOptionList("Metals", Densities.metals, listIndex);
                 go.SetCommandPrompt("Please select a material.");
                 GetResult res = go.Get();
@@ -109,40 +111,6 @@ namespace RhinoVolumeToWeight
                 RhinoApp.WriteLine("weight is {0} {1} of {2}.", mass, "grams", Densities.metals[metalIndex]);
                 return Result.Success;
             }
-
-            /*
-            Point3d pt0;
-            using (GetPoint getPointAction = new GetPoint())
-            {
-                getPointAction.SetCommandPrompt("Please select the start point");
-                if (getPointAction.Get() != GetResult.Point)
-                {
-                    RhinoApp.WriteLine("No start point was selected.");
-                    return getPointAction.CommandResult();
-                }
-                pt0 = getPointAction.Point();
-            }
-
-            Point3d pt1;
-            using (GetPoint getPointAction = new GetPoint())
-            {
-                getPointAction.SetCommandPrompt("Please select the end point");
-                getPointAction.SetBasePoint(pt0, true);
-                getPointAction.DynamicDraw +=
-                  (sender, e) => e.Display.DrawLine(pt0, e.CurrentPoint, System.Drawing.Color.DarkRed);
-                if (getPointAction.Get() != GetResult.Point)
-                {
-                    RhinoApp.WriteLine("No end point was selected.");
-                    return getPointAction.CommandResult();
-                }
-                pt1 = getPointAction.Point();
-            }
-
-            doc.Objects.AddLine(pt0, pt1);
-            doc.Views.Redraw();
-            RhinoApp.WriteLine("The {0} command added one line to the document.", EnglishName);
-            */
-            // ---
 
         }
     }
