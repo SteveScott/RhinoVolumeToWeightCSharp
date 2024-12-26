@@ -32,18 +32,16 @@ namespace RhinoVolumeToWeight
             RhinoApp.WriteLine("Select a volume");
             Rhino.Geometry.Mesh thisMesh;
             Rhino.Geometry.Brep thisBrep;
-  
-            double thisVolume;
+
+            double thisVolume; //in cubic mm
             using (GetObject getObject = new GetObject())
             {
-                string[] listValues = new string[] { "Sterling Silver", "Brass", "Bronze", "14K Gold", "18K Gold", "24K Gold", "Platinum", "Paladium" };
+                //select an object
+
                 int listIndex = 0;
                 getObject.SetCommandPrompt("Select an object.");
                 getObject.EnablePressEnterWhenDonePrompt(true);
-                int opList = getObject.AddOptionList("List", listValues, listIndex);
-                getObject.SetCommandPrompt("Please select a material.");
-                Rhino.Input.Custom.OptionInteger optInteger = new Rhino.Input.Custom.OptionInteger(1, -1, 100);
-                getObject.AddOptionInteger("Material Integer", ref optInteger);
+
                 var result = getObject.Get();
                 ObjRef objref = getObject.Object(0);
                 thisBrep = objref.Brep();
@@ -58,10 +56,11 @@ namespace RhinoVolumeToWeight
                 {
                     if (thisMesh != null)
                     {
-                        if (thisMesh.IsSolid) {
+                        if (thisMesh.IsSolid)
+                        {
                             var massProperties = VolumeMassProperties.Compute(thisMesh);
-                            thisVolume = massProperties.Volume / 1000.0;
-                            RhinoApp.WriteLine("the volume of the MESH is {0} cm^3", thisVolume);
+                            thisVolume = massProperties.Volume;
+                            RhinoApp.WriteLine("the volume of the MESH is {0} cm^3", thisVolume / 1000);
                         }
                         else
                         {
@@ -71,11 +70,12 @@ namespace RhinoVolumeToWeight
                     }
                     else
                     {
-                        if (thisBrep.IsSolid) {
+                        if (thisBrep.IsSolid)
+                        {
                             var massProperties = VolumeMassProperties.Compute(thisBrep);
-                            thisVolume = massProperties.Volume / 1000.0;
-                            RhinoApp.WriteLine("The volume of this BREP is {0} cm^3", thisVolume);
-                            
+                            thisVolume = massProperties.Volume;
+                            RhinoApp.WriteLine("The volume of this BREP is {0} cm^3", thisVolume / 1000);
+
                         }
                         else
                         {
@@ -87,13 +87,29 @@ namespace RhinoVolumeToWeight
 
                 }
 
-                Rhino.RhinoApp.WriteLine(" Integer = {0}", listValues[optInteger.CurrentValue]);
-                double density = 10.4;
+                Rhino.Input.Custom.OptionInteger optInteger = new Rhino.Input.Custom.OptionInteger(3, 0, Densities.metals.Length);
+                var go = new GetOption();
+                //int optInteger2 = go.AddOptionInteger("MetalOption", ref optInteger);
+                int opList = go.AddOptionList("Metals", Densities.metals, listIndex);
+                go.SetCommandPrompt("Please select a material.");
+                GetResult res = go.Get();
+                if (res != GetResult.Option)
+                {
+                    RhinoApp.WriteLine("invalid input. please select a material");
+                    return Result.Failure;
+                }
+                var option = go.Option();
+                int metalIndex = option.CurrentListOptionIndex;
+                //caluclate density
+                Rhino.RhinoApp.WriteLine(" selection = {0}", Densities.metals[metalIndex]);
+                double density = Densities.metalDensitites[Densities.metals[metalIndex]];
+                Rhino.RhinoApp.WriteLine("density of {0} is {1} grams per cubic cm", Densities.metals[metalIndex], density * 1000);
                 double mass = density * thisVolume;
-                RhinoApp.WriteLine("The weight is {0} {1} of {2}.", mass, "grams", "Sterling Silver");
+                RhinoApp.WriteLine("The volume is {0}", thisVolume);
+                RhinoApp.WriteLine("weight is {0} {1} of {2}.", mass, "grams", Densities.metals[metalIndex]);
                 return Result.Success;
             }
-            
+
             /*
             Point3d pt0;
             using (GetPoint getPointAction = new GetPoint())

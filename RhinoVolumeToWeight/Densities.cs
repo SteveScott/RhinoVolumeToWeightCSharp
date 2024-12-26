@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 namespace RhinoVolumeToWeight
 {
-    public class Densities
+    public static class Densities
     {
-        public Dictionary<string, double> metalDensitites = new Dictionary<string, double>() {
+        public static Dictionary<string, double> metalDensitites = new Dictionary<string, double>() {
             //grams per mm^3
             { "aluminum", 0.0027 },
             { "steel", 0.0078 },
@@ -17,18 +17,17 @@ namespace RhinoVolumeToWeight
             //brass
             //bronze
         };
-            
-        /*
-        pine = 0.0005,
-        oak = 0.0007,
-        brick = 0.0018,
-        concrete = 0.0023,
-        diamond = 0.00351,
-        sapphire = 0.00398,
-        ruby = 0.00398,
-        emerald = 0.0027,
-        glass = 0.0024,
-        */
-        
+
+        public static string[] metals = new string[] {
+            "aluminum",
+            "steel",
+            "sterling_silver",
+            "gold_14K",
+            "gold_18K",
+            "gold_24K",
+            "platinum",
+            "paladium",
+            "titanium"
+        };
     }
 }
