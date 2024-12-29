@@ -13,6 +13,7 @@ namespace RhinoVolumeToWeight
 {
     public class RhinoVolumeToWeightCommand : Command
     {
+        //if you want the value metalIndex to persist, you need to define it at the class level here, not inside the RunCommand method.
         private int metalIndex = 2;
         public RhinoVolumeToWeightCommand()
         {
