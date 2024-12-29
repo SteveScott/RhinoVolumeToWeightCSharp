@@ -8,10 +8,12 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
+
 namespace RhinoVolumeToWeight
 {
     public class RhinoVolumeToWeightCommand : Command
     {
+        private int metalIndex = 2;
         public RhinoVolumeToWeightCommand()
         {
             // Rhino only creates one instance of each command class defined in a
@@ -86,7 +88,7 @@ namespace RhinoVolumeToWeight
                 }
              
                 var go = new GetOption();
-                int metalIndex = 2;
+                //get stored value
                 int opList = go.AddOptionList("Metals", Densities.metals, metalIndex);
                 go.AcceptNothing(true);
                 go.SetCommandPrompt("Please select a material.");
@@ -97,7 +99,7 @@ namespace RhinoVolumeToWeight
                     var option = go.Option();
                     metalIndex = go.Option().CurrentListOptionIndex;
                 }
-
+                
                 //caluclate density
                 Rhino.RhinoApp.WriteLine(" selection = {0}", Densities.metals[metalIndex]);
                 double density = Densities.metalDensitites[Densities.metals[metalIndex]];
