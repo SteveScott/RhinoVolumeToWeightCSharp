@@ -87,27 +87,31 @@ namespace RhinoVolumeToWeight
                         }
                     }
                 }
-             
-                var go = new GetOption();
-                //get stored value
-                int opList = go.AddOptionList("Metals", Densities.metals, metalIndex);
-                go.AcceptNothing(true);
-                go.SetCommandPrompt("Please select a material.");
-                GetResult res = go.Get();
 
-                if (res == GetResult.Option)
-                { 
-                    var option = go.Option();
-                    metalIndex = go.Option().CurrentListOptionIndex;
+
+                using (var go = new GetOption())
+                {
+
+                    //get stored value
+                    int opList = go.AddOptionList("Metals", Densities.metals, metalIndex);
+                    go.AcceptNothing(true);
+                    go.SetCommandPrompt("Please select a material.");
+                    GetResult res = go.Get();
+
+                    if (res == GetResult.Option)
+                    {
+                        var option = go.Option();
+                        metalIndex = go.Option().CurrentListOptionIndex;
+                    }
+
+                    //caluclate density
+                    Rhino.RhinoApp.WriteLine(" selection = {0}", Densities.metals[metalIndex]);
+                    double density = Densities.metalDensitites[Densities.metals[metalIndex]];
+                    Rhino.RhinoApp.WriteLine("density of {0} is {1} grams per cubic cm", Densities.metals[metalIndex], density * 1000);
+                    double mass = density * thisVolume;
+                    RhinoApp.WriteLine("The volume is {0}", thisVolume);
+                    RhinoApp.WriteLine("weight is {0} {1} of {2}.", mass, "grams", Densities.metals[metalIndex]);
                 }
-                
-                //caluclate density
-                Rhino.RhinoApp.WriteLine(" selection = {0}", Densities.metals[metalIndex]);
-                double density = Densities.metalDensitites[Densities.metals[metalIndex]];
-                Rhino.RhinoApp.WriteLine("density of {0} is {1} grams per cubic cm", Densities.metals[metalIndex], density * 1000);
-                double mass = density * thisVolume;
-                RhinoApp.WriteLine("The volume is {0}", thisVolume);
-                RhinoApp.WriteLine("weight is {0} {1} of {2}.", mass, "grams", Densities.metals[metalIndex]);
                 return Result.Success;
             }
 
